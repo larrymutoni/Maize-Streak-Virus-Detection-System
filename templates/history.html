@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/static/history.css">
+    <title>History</title>
+</head>
+<body>
+   <header>
+    <div class="navbar">
+        <div class="logo"><a href="#">Maize Streak Disease Detection System</a></div>
+        <u class="links">
+            <li><a href="home">Home</a></li>
+            <li><a href="/history">History</a></li>
+            
+            <li><a href="/logout">Logout</a></li>
+        </u>
+        
+        <div class="toggle_btn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+    </div>
+    <div class="dropdown_menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/history">History</a></li>
+        
+        <li><a href="/logout">Logout</a></li>
+        
+    </div>
+   </header>
+
+   <main>
+        <section id="history">
+            <h1>Past Predictions</h1>
+
+            <table class="prediction-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Class Label</th>
+                        <th>Confidence</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prediction in past_predictions %}
+                        <tr>
+                            <td><img src="{{ url_for('uploaded_file', filename=prediction.image_path) }}" alt="Uploaded Image"></td>
+                            <td>{{ prediction.class_label }}</td>
+                            <td>{{ prediction.confidence*100 }}%</td>
+                            <td>{{ prediction.created_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+  
+
+
+<script>
+        const toggleBtn = document.querySelector('.toggle_btn')
+        const toggleBtnIcon = document.querySelector('.toggle_btn i')
+        const dropDownMenu = document.querySelector('.dropdown_menu')
+
+        toggleBtn.onclick = function () {
+            dropDownMenu.classList.toggle('open')
+            const isOpen = dropDownMenu.classList.contains('open')
+
+            toggleBtnIcon.classList = isOpen
+            ? 'fa-solid fa-xmark'
+            : 'fa-solid fa-bars'
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const tableBody = document.querySelector(".prediction-table tbody");
+            const loadMoreBtn = document.getElementById("load-more-btn");
+            const predictions = JSON.parse('{{ past_predictions | tojson | safe }}');
+            let counter = 7; // Display the latest 5 items initially
+
+            const displayItems = () => {
+                tableBody.innerHTML = ""; // Clear existing content
+                predictions.slice(0, counter).forEach(prediction => {
+                    const row = document.createElement("tr");
+                    const imageCell = document.createElement("td");
+                    const classLabelCell = document.createElement("td");
+                    const confidenceCell = document.createElement("td");
+                    const dateCell = document.createElement("td");
+
+                    const imageElement = document.createElement("img");
+                    imageElement.src = "{{ url_for('uploaded_file', filename='')}}" + prediction.image_path;
+                    imageElement.alt = "Uploaded Image";
+
+                    imageCell.appendChild(imageElement);
+                    classLabelCell.textContent = prediction.class_label;
+                    confidenceCell.textContent = prediction.confidence*100 + "%";
+                    dateCell.textContent = prediction.created_at;
+
+                    row.appendChild(imageCell);
+                    row.appendChild(classLabelCell);
+                    row.appendChild(confidenceCell);
+                    row.appendChild(dateCell);
+
+                    tableBody.appendChild(row);
+                });
+
+                // If there are more items to load, display the "Load More" button
+                if (counter < predictions.length) {
+                    loadMoreBtn.style.display = "block";
+                } else {
+                    loadMoreBtn.style.display = "none";
+                }
+            };
+
+            
+            displayItems();
+
+            
+            loadMoreBtn.addEventListener("click", function () {
+                counter += 5; 
+                displayItems();
+            });
+        });
+    </script>
+
+</body>
+</html>
