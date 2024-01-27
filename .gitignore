@@ -1,4 +1,3 @@
 # .gitignore
 
-model/combined_model2.h5
 .venv/
